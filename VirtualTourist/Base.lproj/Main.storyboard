@@ -10,6 +10,21 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--Album View Controller-->
+        <scene sceneID="HZk-wL-CLw">
+            <objects>
+                <viewController id="zl6-a1-xJe" customClass="AlbumViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="tiW-6L-tPg">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="S4u-Bi-kda"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="YaP-6P-JCM" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="127" y="118"/>
+        </scene>
         <!--Navigation Controller-->
         <scene sceneID="P93-Ui-OUi">
             <objects>
@@ -18,18 +33,21 @@
                         <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="RQO-tp-DQO">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
-                        <segue destination="8sT-aA-AAI" kind="relationship" relationship="rootViewController" id="qba-bZ-ynw"/>
+                        <segue destination="8sT-aA-AAI" kind="relationship" relationship="rootViewController" id="7wj-tV-Nb4"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EID-h9-E3A" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1654" y="120"/>
         </scene>
-        <!--Virtual Tourist-->
+        <!--Map View Controller-->
         <scene sceneID="7JA-rA-A1J">
             <objects>
-                <viewController id="8sT-aA-AAI" sceneMemberID="viewController">
+                <viewController id="8sT-aA-AAI" customClass="MapViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="7Zf-k9-Uxr">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -51,35 +69,21 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="kqN-d1-nQ4"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Virtual Tourist" id="uB8-bM-pFb">
-                        <barButtonItem key="rightBarButtonItem" title="Edit" id="NSH-Ln-fHq"/>
+                    <navigationItem key="navigationItem" id="2gq-Z2-Fos">
+                        <barButtonItem key="backBarButtonItem" title="OK" id="vjM-eQ-hNd"/>
                     </navigationItem>
                     <connections>
-                        <segue destination="iY0-v0-Q8O" kind="show" id="eaL-MA-hdZ"/>
+                        <segue destination="zl6-a1-xJe" kind="show" identifier="showAlbum" id="gmk-es-WVL"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7KZ-9Z-plo" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <pongPressGestureRecognizer allowableMovement="10" minimumPressDuration="0.5" id="Dgx-sk-FQw"/>
+                <pongPressGestureRecognizer allowableMovement="15" minimumPressDuration="0.5" id="Dgx-sk-FQw">
+                    <connections>
+                        <action selector="addPin:" destination="8sT-aA-AAI" id="sv7-Ua-J28"/>
+                    </connections>
+                </pongPressGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="-695" y="119"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="09U-Uy-NYT">
-            <objects>
-                <viewController id="iY0-v0-Q8O" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="yip-dO-NfU">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        <viewLayoutGuide key="safeArea" id="21x-yk-XQc"/>
-                    </view>
-                    <navigationItem key="navigationItem" leftItemsSupplementBackButton="YES" id="1bv-CO-ZWo">
-                        <barButtonItem key="backBarButtonItem" title="OK" id="trF-KP-f6p"/>
-                    </navigationItem>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="9cd-pw-T5h" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="106" y="118"/>
         </scene>
     </scenes>
 </document>

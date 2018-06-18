@@ -8,8 +8,8 @@
 
 import UIKit
 
-class ViewController: UIViewController {
-
+class MapViewController: UIViewController {
+    var  albumViewActive = false
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -21,7 +21,12 @@ class ViewController: UIViewController {
     }
     
     @IBAction func addPin (_ sender: UILongPressGestureRecognizer) {
-    
+        if !albumViewActive{
+            performSegue(withIdentifier: "showAlbum", sender: nil)
+            print ("seque")
+        }
+        albumViewActive = true
+        
     }
 
 }
