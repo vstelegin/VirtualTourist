@@ -73,6 +73,7 @@
                         <barButtonItem key="backBarButtonItem" title="OK" id="vjM-eQ-hNd"/>
                     </navigationItem>
                     <connections>
+                        <outlet property="mapView" destination="AW1-N0-AXJ" id="m7K-Wm-3pQ"/>
                         <segue destination="zl6-a1-xJe" kind="show" identifier="showAlbum" id="gmk-es-WVL"/>
                     </connections>
                 </viewController>
