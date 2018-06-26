@@ -15,12 +15,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     var annotation : MKPointAnnotation? = nil
     var dataController : DataController!
     var fetchedResultsController: NSFetchedResultsController<Pin>!
+    var pinToDelete: NSManagedObject?
     @IBOutlet weak var mapView: MKMapView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
-        
+        navigationItem.rightBarButtonItem = editButtonItem
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "lat", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
@@ -34,8 +35,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         
         print("Pins: \(fetchedResultsController.sections![0].numberOfObjects)")
         
-        let pins = fetchedResultsController.fetchedObjects as! [Pin]
-        
+        guard let pins = fetchedResultsController.fetchedObjects else {
+            return
+        }
         for pin in pins {
             let lat = Double(pin.lat!)
             let long = Double (pin.long!)
@@ -45,6 +47,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         
     }
     
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+    }
     fileprivate func showPin(_ coordinate: CLLocationCoordinate2D) {
         annotation = MKPointAnnotation()
         annotation!.coordinate = coordinate
@@ -63,7 +68,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         case .changed:
             annotation!.coordinate = coordinate
         case .ended:
-            print("Ended")
             let pin = Pin(context: dataController.viewContext)
             pin.lat = String(coordinate.latitude)
             pin.long = String(coordinate.longitude)
@@ -81,7 +85,27 @@ class MapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         
     }
     
-    
-    
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        
+        guard let annotation = view.annotation else {
+            return
+        }
+        let lat = String(annotation.coordinate.latitude)
+        print ("Lat is \(lat)")
+        for pin in fetchedResultsController.fetchedObjects!{
+            print (pin.lat)
+            
+            if pin.lat == lat {
+                pinToDelete = pin
+            }
+        }
+        if isEditing {
+            mapView.removeAnnotation(annotation)
+            dataController.viewContext.delete(pinToDelete!)
+            try? dataController.viewContext.save()
+        } else {
+            return
+        }
+    }
 }
 
