@@ -10,12 +10,12 @@ import UIKit
 import MapKit
 import CoreData
 
-class MapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate{
+class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
     var albumViewActive = false
     var annotation : MKPointAnnotation? = nil
     var dataController : DataController!
     var fetchedResultsController: NSFetchedResultsController<Pin>!
-    var pinToDelete: NSManagedObject?
+    
     @IBOutlet weak var mapView: MKMapView!
     
     override func viewDidLoad() {
@@ -85,27 +85,47 @@ class MapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         
     }
     
+    
+}
+
+extension MapViewController: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        let reuseId = "pin"
+        
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
+        
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = false
+            pinView!.pinTintColor = .red
+            pinView!.animatesDrop = true
+        } else {
+            pinView!.annotation = annotation
+        }
+        return pinView
+    }
+    
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
         guard let annotation = view.annotation else {
             return
         }
         let lat = String(annotation.coordinate.latitude)
+        let long = String(annotation.coordinate.longitude)
         print ("Lat is \(lat)")
-        for pin in fetchedResultsController.fetchedObjects!{
-            print (pin.lat)
-            
-            if pin.lat == lat {
-                pinToDelete = pin
-            }
-        }
-        if isEditing {
+        let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
+        let predicate = NSPredicate(format: "lat == %@ AND long == %@", lat, long)
+        fetchRequest.predicate = predicate
+        do {
+            let selectedPin = try dataController.viewContext.fetch(fetchRequest).first
+            if isEditing{
             mapView.removeAnnotation(annotation)
-            dataController.viewContext.delete(pinToDelete!)
+            dataController.viewContext.delete(selectedPin!)
             try? dataController.viewContext.save()
-        } else {
-            return
+            }
+        } catch {
+            print (error)
         }
     }
 }
-
