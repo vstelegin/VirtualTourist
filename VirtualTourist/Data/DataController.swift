@@ -13,6 +13,8 @@ class DataController{
     let persistentContainer: NSPersistentContainer
     let backgroundContext: NSManagedObjectContext
     
+    
+    
     var viewContext: NSManagedObjectContext{
         return persistentContainer.viewContext
     }

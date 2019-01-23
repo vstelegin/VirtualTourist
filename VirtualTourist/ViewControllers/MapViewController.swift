@@ -47,9 +47,17 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let photoAlbum = segue.destination as? PhotoAlbumViewController {
+            photoAlbum.pin = sender as? Pin
+        }
+    }
+    
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
+        mapView.gestureRecognizers?.first!.isEnabled = !editing
     }
+    
     fileprivate func showPin(_ coordinate: CLLocationCoordinate2D) {
         annotation = MKPointAnnotation()
         annotation!.coordinate = coordinate
@@ -111,21 +119,28 @@ extension MapViewController: MKMapViewDelegate {
         guard let annotation = view.annotation else {
             return
         }
+        
         let lat = String(annotation.coordinate.latitude)
         let long = String(annotation.coordinate.longitude)
-        print ("Lat is \(lat)")
+        
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         let predicate = NSPredicate(format: "lat == %@ AND long == %@", lat, long)
         fetchRequest.predicate = predicate
+        var selectedPin: Pin?
+        
         do {
-            let selectedPin = try dataController.viewContext.fetch(fetchRequest).first
-            if isEditing{
-            mapView.removeAnnotation(annotation)
-            dataController.viewContext.delete(selectedPin!)
-            try? dataController.viewContext.save()
-            }
+            try selectedPin = dataController.viewContext.fetch(fetchRequest).first
+            
         } catch {
             print (error)
         }
+        
+        if isEditing {
+            mapView.removeAnnotation(annotation)
+            dataController.viewContext.delete(selectedPin!)
+            try? dataController.viewContext.save()
+            return
+        }
+        performSegue(withIdentifier: "showAlbum", sender: selectedPin)
     }
 }
