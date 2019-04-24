@@ -13,7 +13,7 @@
         <!--Photo Album View Controller-->
         <scene sceneID="HZk-wL-CLw">
             <objects>
-                <viewController id="zl6-a1-xJe" customClass="PhotoAlbumViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="3" id="zl6-a1-xJe" customClass="PhotoAlbumViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="tiW-6L-tPg">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -34,7 +34,7 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="FlickrCell" id="0Aa-Mn-xua">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCell" id="0Aa-Mn-xua" customClass="PhotoCell" customModule="VirtualTourist" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
@@ -45,6 +45,10 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                     <color key="backgroundColor" red="0.14901960780000001" green="0.74653192660000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 </imageView>
+                                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="egQ-mq-gLJ" userLabel="Activity Indicator">
+                                                    <rect key="frame" x="40" y="40" width="20" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                </activityIndicatorView>
                                             </subviews>
                                         </view>
                                         <constraints>
@@ -53,6 +57,10 @@
                                             <constraint firstAttribute="trailing" secondItem="VEV-FG-jsE" secondAttribute="trailing" id="miQ-Vx-UtV"/>
                                             <constraint firstItem="VEV-FG-jsE" firstAttribute="top" secondItem="0Aa-Mn-xua" secondAttribute="top" id="vle-DU-thG"/>
                                         </constraints>
+                                        <connections>
+                                            <outlet property="activityIndicator" destination="egQ-mq-gLJ" id="aVM-uL-Y8Q"/>
+                                            <outlet property="imageView" destination="VEV-FG-jsE" id="78n-iH-t0W"/>
+                                        </connections>
                                     </collectionViewCell>
                                 </cells>
                                 <connections>
@@ -67,12 +75,16 @@
                                 </constraints>
                                 <state key="normal" title="New Collection"/>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xs1-j9-5BV">
-                                <rect key="frame" x="166.66666666666666" y="395.66666666666669" width="42" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xs1-j9-5BV">
+                                <rect key="frame" x="187.66666666666666" y="406" width="0.0" height="0.0"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="tax-XD-Ikn" userLabel="Activity Indicator">
+                                <rect key="frame" x="177" y="396" width="20" height="20"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -93,7 +105,9 @@
                         <viewLayoutGuide key="safeArea" id="S4u-Bi-kda"/>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="tax-XD-Ikn" id="39s-EB-jgh"/>
                         <outlet property="collectionView" destination="ABT-Fl-wSH" id="hep-DS-ZPf"/>
+                        <outlet property="messageLabel" destination="Xs1-j9-5BV" id="Wy6-cc-5Ea"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YaP-6P-JCM" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -103,7 +117,7 @@
         <!--Navigation Controller-->
         <scene sceneID="P93-Ui-OUi">
             <objects>
-                <navigationController id="19o-at-exj" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="1" id="19o-at-exj" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="QkJ-O8-rbg">
                         <rect key="frame" x="0.0" y="44" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -122,7 +136,7 @@
         <!--Map View Controller-->
         <scene sceneID="7JA-rA-A1J">
             <objects>
-                <viewController id="8sT-aA-AAI" customClass="MapViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="2" id="8sT-aA-AAI" customClass="MapViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="7Zf-k9-Uxr">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

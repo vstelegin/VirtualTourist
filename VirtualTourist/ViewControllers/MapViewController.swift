@@ -13,7 +13,7 @@ import CoreData
 class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
     var albumViewActive = false
     var annotation : MKPointAnnotation? = nil
-    var dataController : DataController!
+    //var dataController : DataController!
     var fetchedResultsController: NSFetchedResultsController<Pin>!
     
     @IBOutlet weak var mapView: MKMapView!
@@ -22,10 +22,11 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         super.viewDidLoad()
         mapView.delegate = self
         navigationItem.rightBarButtonItem = editButtonItem
+        
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "lat", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: nil)
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: DataController.shared.viewContext, sectionNameKeyPath: nil, cacheName: nil)
         fetchedResultsController.delegate = self
         do {
             try fetchedResultsController.performFetch()
@@ -38,6 +39,7 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         guard let pins = fetchedResultsController.fetchedObjects else {
             return
         }
+        
         for pin in pins {
             let lat = Double(pin.lat!)
             let long = Double (pin.long!)
@@ -68,7 +70,6 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         let location = sender.location(in: mapView)
         let coordinate = mapView.convert(location, toCoordinateFrom: mapView)
         
-       
         switch sender.state {
         case .began:
             showPin(coordinate)
@@ -76,10 +77,10 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         case .changed:
             annotation!.coordinate = coordinate
         case .ended:
-            let pin = Pin(context: dataController.viewContext)
+            let pin = Pin(context: DataController.shared.viewContext)
             pin.lat = String(coordinate.latitude)
             pin.long = String(coordinate.longitude)
-            try? dataController.viewContext.save()
+            try? DataController.shared.viewContext.save()
             print("Saved")
         default:
             break
@@ -129,7 +130,7 @@ extension MapViewController: MKMapViewDelegate {
         var selectedPin: Pin?
         
         do {
-            try selectedPin = dataController.viewContext.fetch(fetchRequest).first
+            try selectedPin = DataController.shared.viewContext.fetch(fetchRequest).first
             
         } catch {
             print (error)
@@ -137,8 +138,8 @@ extension MapViewController: MKMapViewDelegate {
         
         if isEditing {
             mapView.removeAnnotation(annotation)
-            dataController.viewContext.delete(selectedPin!)
-            try? dataController.viewContext.save()
+            DataController.shared.viewContext.delete(selectedPin!)
+            try? DataController.shared.viewContext.save()
             return
         }
         performSegue(withIdentifier: "showAlbum", sender: selectedPin)

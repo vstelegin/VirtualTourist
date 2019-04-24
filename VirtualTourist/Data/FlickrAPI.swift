@@ -10,7 +10,7 @@ import Foundation
 
 class FlickrAPI {
     
-    func photosRequestFromLatLong(_ lat: String, _ long: String) -> Void{
+    func photosRequestFromLatLong(_ lat: String, _ long: String, completion: @escaping (_ parsedResult: [String:AnyObject]?, _ error: String? ) -> Void){
         
         
         var components = URLComponents()
@@ -21,9 +21,10 @@ class FlickrAPI {
             Constants.FlickrParameterKeys.SearchMethod : Constants.FlickrParameterValues.SearchMethod,
             Constants.FlickrParameterKeys.APIKey : Constants.FlickrParameterValues.APIKey,
             Constants.FlickrParameterKeys.SearchRadius : Constants.FlickrParameterValues.SearchRadius,
-            Constants.FlickrParameterKeys.Extras : Constants.FlickrParameterValues.MediumURL,
+            Constants.FlickrParameterKeys.Extras : Constants.FlickrParameterValues.URL,
             Constants.FlickrParameterKeys.Format : Constants.FlickrParameterValues.ResponseFormat,
             Constants.FlickrParameterKeys.NoJSONCallback : Constants.FlickrParameterValues.DisableJSONCallback,
+            Constants.FlickrParameterKeys.PhotosPerPage : Constants.FlickrParameterValues.PhotosPerPage,
             Constants.FlickrParameterKeys.Latitude : lat,
             Constants.FlickrParameterKeys.Longitude : long
         ]
@@ -35,23 +36,38 @@ class FlickrAPI {
         }
         
         print(components.url!)
-        
         let session = URLSession.shared
         let request = URLRequest(url: components.url!)
         
-        let task = session.dataTask(with: request) { (data, responce, error) in
+        let task = session.dataTask(with: request) { (data, response, error) in
+            
+            guard (error == nil) else {
+                print (error?.localizedDescription ?? "error returned")
+                completion(nil, "error returned")
+                return
+            }
+            
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
+                completion(nil, "Bad status code from server")
+                return
+            }
+            
             guard let data = data else {
+                completion(nil, "No data was returned from server")
                 print ("no data")
                 return
             }
+            
             let parsedResult: [String:AnyObject]!
             do {
                 parsedResult = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String:AnyObject]
-                print (parsedResult)
+                completion (parsedResult, nil)
+                
             } catch {
                 print("Could not parse the data as JSON: '\(data)'")
-                return
+                completion (nil, "Could not parse the data as JSON")
             }
+            
         }
         
         

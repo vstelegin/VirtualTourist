@@ -33,6 +33,7 @@ struct Constants {
         static let SearchRadius = "radius"
         static let Latitude = "lat"
         static let Longitude = "lon"
+        static let PhotosPerPage = "per_page"
         static let Page = "page"
     }
     
@@ -44,9 +45,10 @@ struct Constants {
         static let DisableJSONCallback = "1" /* 1 means "yes" */
         static let GalleryPhotosMethod = "flickr.galleries.getPhotos"
         static let GalleryID = "5704-72157622566655097"
-        static let MediumURL = "url_n"
+        static let URL = "url_sq"
         static let UseSafeSearch = "1"
         static let SearchRadius = "4"
+        static let PhotosPerPage = "18"
     }
     
     // MARK: - Flickr Response Keys
@@ -55,9 +57,9 @@ struct Constants {
         static let Photos = "photos"
         static let Photo = "photo"
         static let Title = "title"
-        static let MediumURL = "url_m"
+        static let URL = "url_sq"
         static let Pages = "pages"
-        static let Total = "total"
+        static let TotalPhotos = "total"
     }
     
     // MARK: - Flickr Response Values
