@@ -4,3 +4,9 @@ The Virtual Tourist app downloads and stores images from **Flickr**. The app all
 ## Requirements 
 Xcode 9.4  
 Swift 4.0
+
+## Instructions
+Build using XCode 9.0 or higher
+
+## Project status
+Work in progress
