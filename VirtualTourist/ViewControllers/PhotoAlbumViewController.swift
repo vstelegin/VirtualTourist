@@ -13,16 +13,17 @@ class PhotoAlbumViewController : UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var activityIndicator : UIActivityIndicatorView!
+    @IBOutlet weak var flowLayout : UICollectionViewFlowLayout!
     var pin: Pin?
     var fetchedResultsController: NSFetchedResultsController<Photo>!
     var cellCount = 0
     var imageURL : URL!
-    
+    let photosPerRow : CGFloat = 3
     private func setupFetchedResultsController(_ pin: Pin!) {
         
         let fetchRequest : NSFetchRequest<Photo> = Photo.fetchRequest()
         fetchRequest.sortDescriptors = []
-        fetchRequest.predicate = NSPredicate (format: "pin == %@", argumentArray: [pin])
+        fetchRequest.predicate = NSPredicate (format: "pin == %@", argumentArray: [pin!])
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: DataController.shared.viewContext, sectionNameKeyPath: nil, cacheName: nil)
         
         fetchedResultsController.delegate = self
@@ -150,7 +151,6 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
         
         let currentCell = cell as! PhotoCell
         currentCell.indexPath = indexPath
-        
         loadPhoto(currentCell)
 
     }
@@ -175,7 +175,7 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
             guard let photoURL = photo.photoURL else {
                 return
             }
-            
+
             guard let photoData = try? Data(contentsOf: photoURL) else{
                 return
             }
@@ -183,12 +183,24 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
             DispatchQueue.global(qos: .background).async {
                 try? DataController.shared.viewContext.save()
             }
-            
+
             cell.imageView.image = UIImage(data: Data(referencing: photoData as NSData))
-            
+
         }
         performUIUpdatesOnMain {
             cell.activityIndicator.stopAnimating()
         }
+    }
+}
+
+extension PhotoAlbumViewController : UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+
+        let photosRowWidth = view.frame.width - flowLayout.sectionInset.left - flowLayout.sectionInset.right
+        let widthPerItem = photosRowWidth / photosPerRow
+        
+        return CGSize(width: widthPerItem, height: widthPerItem)
     }
 }

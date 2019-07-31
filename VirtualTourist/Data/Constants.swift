@@ -45,7 +45,7 @@ struct Constants {
         static let DisableJSONCallback = "1" /* 1 means "yes" */
         static let GalleryPhotosMethod = "flickr.galleries.getPhotos"
         static let GalleryID = "5704-72157622566655097"
-        static let URL = "url_sq"
+        static let URL = "url_q"
         static let UseSafeSearch = "1"
         static let SearchRadius = "4"
         static let PhotosPerPage = "18"
@@ -57,7 +57,7 @@ struct Constants {
         static let Photos = "photos"
         static let Photo = "photo"
         static let Title = "title"
-        static let URL = "url_sq"
+        static let URL = "url_q"
         static let Pages = "pages"
         static let TotalPhotos = "total"
     }
