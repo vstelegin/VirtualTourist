@@ -157,6 +157,7 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
     
     func loadPhoto(_ cell : PhotoCell){
         performUIUpdatesOnMain {
+            self.activityIndicator.stopAnimating()
             cell.activityIndicator.startAnimating()
         }
         
@@ -169,27 +170,35 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
         }
         
         if let photoData = photo.photoData {
-            cell.imageView.image = UIImage(data: Data(referencing: photoData as NSData))
+            performUIUpdatesOnMain{
+                cell.imageView.image = UIImage(data: Data(referencing: photoData as NSData))
+                cell.activityIndicator.stopAnimating()
+            }
+            
         }
         else {
+            
             guard let photoURL = photo.photoURL else {
                 return
             }
-
-            guard let photoData = try? Data(contentsOf: photoURL) else{
-                return
+            
+            let downloadQueue = DispatchQueue(label: "download", attributes: [])
+            downloadQueue.async {
+                if let photoData = try? Data(contentsOf: photoURL) {
+                    
+                    photo.photoData = photoData
+                    DispatchQueue.global(qos: .background).async {
+                        try? DataController.shared.viewContext.save()
+                    }
+                    
+                    performUIUpdatesOnMain {
+                        cell.imageView.image = UIImage(data: Data(referencing: photoData as NSData))
+                        cell.activityIndicator.stopAnimating()
+                    }
+                }
             }
-            photo.photoData = photoData
-            DispatchQueue.global(qos: .background).async {
-                try? DataController.shared.viewContext.save()
-            }
-
-            cell.imageView.image = UIImage(data: Data(referencing: photoData as NSData))
-
         }
-        performUIUpdatesOnMain {
-            cell.activityIndicator.stopAnimating()
-        }
+        
     }
 }
 
