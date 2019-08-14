@@ -11,7 +11,7 @@ import MapKit
 import CoreData
 
 class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
-    var albumViewActive = false
+    
     var annotation : MKPointAnnotation? = nil
     //var dataController : DataController!
     var fetchedResultsController: NSFetchedResultsController<Pin>!
@@ -86,11 +86,6 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
             break
         }
         
-        if !albumViewActive{
-            //performSegue(withIdentifier: "showAlbum", sender: nil)
-            print ("seque")
-        }
-        albumViewActive = true
         
     }
     

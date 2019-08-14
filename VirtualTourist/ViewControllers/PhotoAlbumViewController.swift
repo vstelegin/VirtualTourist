@@ -19,6 +19,8 @@ class PhotoAlbumViewController : UIViewController {
     var cellCount = 0
     var imageURL : URL!
     let photosPerRow : CGFloat = 3
+    var insertedIndexPaths : [IndexPath] = []
+    var deletedIndexPaths : [IndexPath] = []
     private func setupFetchedResultsController(_ pin: Pin!) {
         
         let fetchRequest : NSFetchRequest<Photo> = Photo.fetchRequest()
@@ -41,6 +43,7 @@ class PhotoAlbumViewController : UIViewController {
         
     }
     
+
     override func viewDidLoad() {
         super.viewDidLoad()
         let api = FlickrAPI.init()
@@ -69,7 +72,7 @@ class PhotoAlbumViewController : UIViewController {
             api.photosRequestFromLatLong(lat, long) { parsedResult, error in
                 
                 
-                print ("Parsed result: \(parsedResult ??  ["empty result":"" as AnyObject])")
+                print ("Parsed result: \(parsedResult ??  ["Empty result":"" as AnyObject])")
                 
                 performUIUpdatesOnMain {
                     self.activityIndicator.stopAnimating()
@@ -108,28 +111,20 @@ class PhotoAlbumViewController : UIViewController {
                     
                 }
                 
+            
+                
                 performUIUpdatesOnMain {
-                    self.collectionView.performBatchUpdates({() -> Void in
-                        for _ in photosArray {
-                            let indexPath = IndexPath(row: self.cellCount, section: 0)
-                            self.cellCount += 1
-                            self.collectionView.insertItems(at: [indexPath])
-                            
-                        }
-                        
-                    }, completion: nil)
+                    self.activityIndicator.stopAnimating()
+                    
                 }
+                
+                
             }
         }
         
     }
 }
 
-extension PhotoAlbumViewController : NSFetchedResultsControllerDelegate {
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        
-    }
-}
 
 extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionViewDelegate {
     
@@ -138,9 +133,14 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
         return 1
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let sections = fetchedResultsController.sections
-        let photosCount = sections?[0].numberOfObjects
-        return photosCount!
+        guard let fr = self.fetchedResultsController else {
+            messageLabel.text = "No Results"
+            return 0
+        }
+        guard let sections = fr.sections else {
+            return 0
+        }
+        return sections[section].numberOfObjects
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PhotoCell
@@ -157,7 +157,6 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
     
     func loadPhoto(_ cell : PhotoCell){
         performUIUpdatesOnMain {
-            self.activityIndicator.stopAnimating()
             cell.activityIndicator.startAnimating()
         }
         
@@ -211,5 +210,44 @@ extension PhotoAlbumViewController : UICollectionViewDelegateFlowLayout {
         let widthPerItem = photosRowWidth / photosPerRow
         
         return CGSize(width: widthPerItem, height: widthPerItem)
+    }
+}
+
+extension PhotoAlbumViewController : NSFetchedResultsControllerDelegate {
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        insertedIndexPaths = [IndexPath]()
+        deletedIndexPaths = [IndexPath]()
+    }
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        switch type {
+        case .insert:
+            if let newIndexPath = newIndexPath {
+                insertedIndexPaths.append(newIndexPath)
+            }
+            break
+        case .delete:
+            if let newIndexPath = newIndexPath {
+                deletedIndexPaths.append(newIndexPath)
+            }
+        default: break
+        }
+        
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        self.collectionView.performBatchUpdates({() -> Void in
+            for indexPath in self.insertedIndexPaths {
+                //let indexPath = IndexPath(row: self.cellCount, section: 0)
+                //self.cellCount += 1
+                self.collectionView.insertItems(at: [indexPath])
+            }
+            for indexPath in self.deletedIndexPaths {
+                //let indexPath = IndexPath(row: self.cellCount, section: 0)
+                //self.cellCount += 1
+                self.collectionView.deleteItems(at: [indexPath])
+            }
+            //self.cellCount = 0
+            
+        }, completion: nil)
     }
 }
