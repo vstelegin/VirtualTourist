@@ -10,8 +10,9 @@ import Foundation
 
 class FlickrAPI {
     
+    static let shared = FlickrAPI()
+    
     func photosRequestFromLatLong(_ lat: String, _ long: String, completion: @escaping (_ parsedResult: [String:AnyObject]?, _ error: String? ) -> Void){
-        
         
         var components = URLComponents()
         components.scheme = Constants.Flickr.APIScheme

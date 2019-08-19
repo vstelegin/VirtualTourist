@@ -24,9 +24,8 @@
                                     <constraint firstAttribute="height" constant="128" id="OZJ-Zq-9P8"/>
                                 </constraints>
                             </mapView>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="ABT-Fl-wSH">
-                                <rect key="frame" x="0.0" y="192" width="414" height="473"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="ABT-Fl-wSH">
+                                <rect key="frame" x="0.0" y="192" width="414" height="500"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="NT0-ha-MQh">
                                     <size key="itemSize" width="150" height="150"/>
@@ -69,32 +68,51 @@
                                     <outlet property="delegate" destination="zl6-a1-xJe" id="rof-cA-Kar"/>
                                 </connections>
                             </collectionView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="o6e-Od-BsJ">
-                                <rect key="frame" x="155" y="681" width="104" height="30"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="30" id="OIo-OS-0wN"/>
-                                </constraints>
-                                <state key="normal" title="New Collection"/>
-                            </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xs1-j9-5BV">
                                 <rect key="frame" x="207" y="368" width="0.0" height="0.0"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="tax-XD-Ikn" userLabel="Activity Indicator">
-                                <rect key="frame" x="177" y="396" width="20" height="20"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="tax-XD-Ikn" userLabel="Activity Indicator">
+                                <rect key="frame" x="197" y="390" width="20" height="20"/>
                             </activityIndicatorView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5vC-0C-tHx">
+                                <rect key="frame" x="0.0" y="692" width="414" height="44"/>
+                                <items>
+                                    <barButtonItem style="done" id="5sK-TT-838">
+                                        <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="o6e-Od-BsJ">
+                                            <rect key="frame" x="20" y="7" width="374" height="30"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="30" id="OIo-OS-0wN"/>
+                                            </constraints>
+                                            <state key="normal" title="New Collection"/>
+                                            <connections>
+                                                <action selector="newCollection:" destination="zl6-a1-xJe" eventType="touchUpInside" id="0he-bd-Qvq"/>
+                                            </connections>
+                                        </button>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="S4u-Bi-kda" firstAttribute="bottom" secondItem="o6e-Od-BsJ" secondAttribute="bottom" constant="25" id="1YQ-JD-pEc"/>
+                            <constraint firstItem="ABT-Fl-wSH" firstAttribute="top" secondItem="D9Y-Yv-ua1" secondAttribute="bottom" id="165-3f-ZNM"/>
+                            <constraint firstItem="5vC-0C-tHx" firstAttribute="top" secondItem="ABT-Fl-wSH" secondAttribute="bottom" id="HPn-ha-ygn"/>
                             <constraint firstItem="D9Y-Yv-ua1" firstAttribute="leading" secondItem="S4u-Bi-kda" secondAttribute="leading" id="Iki-eG-bzk"/>
-                            <constraint firstItem="o6e-Od-BsJ" firstAttribute="centerX" secondItem="tiW-6L-tPg" secondAttribute="centerX" id="Rzt-KZ-TRN"/>
+                            <constraint firstItem="5vC-0C-tHx" firstAttribute="width" secondItem="tiW-6L-tPg" secondAttribute="width" id="M91-x3-jx7"/>
+                            <constraint firstItem="5vC-0C-tHx" firstAttribute="centerX" secondItem="S4u-Bi-kda" secondAttribute="centerX" id="RnG-aC-CMM"/>
+                            <constraint firstItem="tax-XD-Ikn" firstAttribute="centerY" secondItem="S4u-Bi-kda" secondAttribute="centerY" id="U3V-wp-hPA"/>
+                            <constraint firstItem="ABT-Fl-wSH" firstAttribute="trailing" secondItem="S4u-Bi-kda" secondAttribute="trailing" id="X9E-rk-aWV"/>
                             <constraint firstItem="D9Y-Yv-ua1" firstAttribute="trailing" secondItem="S4u-Bi-kda" secondAttribute="trailing" id="Xrp-pi-AEO"/>
+                            <constraint firstItem="ABT-Fl-wSH" firstAttribute="top" secondItem="D9Y-Yv-ua1" secondAttribute="bottom" id="blW-b7-RMc"/>
+                            <constraint firstItem="ABT-Fl-wSH" firstAttribute="leading" secondItem="S4u-Bi-kda" secondAttribute="leading" id="cpJ-QZ-JL2"/>
+                            <constraint firstItem="tax-XD-Ikn" firstAttribute="centerX" secondItem="S4u-Bi-kda" secondAttribute="centerX" id="dEM-zd-0b1"/>
+                            <constraint firstItem="S4u-Bi-kda" firstAttribute="bottom" secondItem="5vC-0C-tHx" secondAttribute="bottom" id="eXc-08-1dy"/>
                             <constraint firstItem="Xs1-j9-5BV" firstAttribute="centerY" secondItem="tiW-6L-tPg" secondAttribute="centerY" id="gMl-BY-txX"/>
                             <constraint firstItem="D9Y-Yv-ua1" firstAttribute="top" secondItem="S4u-Bi-kda" secondAttribute="top" id="hwv-2q-eVP"/>
+                            <constraint firstItem="ABT-Fl-wSH" firstAttribute="centerX" secondItem="S4u-Bi-kda" secondAttribute="centerX" id="j4L-TB-0Nf"/>
                             <constraint firstItem="Xs1-j9-5BV" firstAttribute="centerX" secondItem="tiW-6L-tPg" secondAttribute="centerX" id="jMi-CQ-k2t"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="S4u-Bi-kda"/>

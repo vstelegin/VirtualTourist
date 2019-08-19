@@ -13,7 +13,6 @@ import CoreData
 class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
     
     var annotation : MKPointAnnotation? = nil
-    //var dataController : DataController!
     var fetchedResultsController: NSFetchedResultsController<Pin>!
     
     @IBOutlet weak var mapView: MKMapView!
@@ -45,8 +44,7 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
             let long = Double (pin.long!)
             let coordinate = CLLocationCoordinate2DMake(lat!, long!)
             showPin(coordinate)
-        }
-        
+        }        
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -80,16 +78,11 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
             let pin = Pin(context: DataController.shared.viewContext)
             pin.lat = String(coordinate.latitude)
             pin.long = String(coordinate.longitude)
-            try? DataController.shared.viewContext.save()
-            print("Saved")
+            DataController.shared.save()
         default:
             break
         }
-        
-        
     }
-    
-    
 }
 
 extension MapViewController: MKMapViewDelegate {
@@ -115,7 +108,7 @@ extension MapViewController: MKMapViewDelegate {
         guard let annotation = view.annotation else {
             return
         }
-        
+        mapView.deselectAnnotation(annotation, animated: true)
         let lat = String(annotation.coordinate.latitude)
         let long = String(annotation.coordinate.longitude)
         
@@ -126,7 +119,6 @@ extension MapViewController: MKMapViewDelegate {
         
         do {
             try selectedPin = DataController.shared.viewContext.fetch(fetchRequest).first
-            
         } catch {
             print (error)
         }
@@ -134,7 +126,7 @@ extension MapViewController: MKMapViewDelegate {
         if isEditing {
             mapView.removeAnnotation(annotation)
             DataController.shared.viewContext.delete(selectedPin!)
-            try? DataController.shared.viewContext.save()
+            DataController.shared.save()
             return
         }
         performSegue(withIdentifier: "showAlbum", sender: selectedPin)

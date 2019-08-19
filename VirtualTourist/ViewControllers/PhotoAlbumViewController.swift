@@ -16,11 +16,11 @@ class PhotoAlbumViewController : UIViewController {
     @IBOutlet weak var flowLayout : UICollectionViewFlowLayout!
     var pin: Pin?
     var fetchedResultsController: NSFetchedResultsController<Photo>!
-    var cellCount = 0
     var imageURL : URL!
     let photosPerRow : CGFloat = 3
-    var insertedIndexPaths : [IndexPath] = []
-    var deletedIndexPaths : [IndexPath] = []
+    var insertedIndexPaths : [IndexPath]!
+    var deletedIndexPaths : [IndexPath]!
+    var updatedIndexPaths : [IndexPath]!
     private func setupFetchedResultsController(_ pin: Pin!) {
         
         let fetchRequest : NSFetchRequest<Photo> = Photo.fetchRequest()
@@ -40,45 +40,42 @@ class PhotoAlbumViewController : UIViewController {
         performUIUpdatesOnMain {
             self.messageLabel.text = text;
         }
-        
     }
-    
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        let api = FlickrAPI.init()
+    @IBAction func newCollection(_ sender: Any){
         guard let pin = pin else {
             return
         }
-        guard let lat = pin.lat  else {
-            print ("empty latitude")
+        guard let photosAtThePin = pin.photosAtThePin else {
             return
         }
+        for photo in photosAtThePin {
+            DataController.shared.viewContext.delete(photo as! NSManagedObject)
+        }
+        print("Deleted")
+        DataController.shared.save()
         
-        guard let long = pin.long else {
-            print ("empty longitude")
+    }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        guard let pin = pin else {
             return
         }
         setupFetchedResultsController(pin)
-        
-        
-        
         activityIndicator.startAnimating()
         
-        let sections = fetchedResultsController.sections
-        let photosCount = sections?[0].numberOfObjects
-        
-        if photosCount == 0 {
-            api.photosRequestFromLatLong(lat, long) { parsedResult, error in
-                
+        if let photosAtThePin = pin.photosAtThePin, photosAtThePin.count == 0 {
+            
+            guard let lat = pin.lat, let long = pin.long  else {
+                print ("incorrect coordinates")
+                return
+            }
+            
+            FlickrAPI.shared.photosRequestFromLatLong(lat, long) { parsedResult, error in
                 
                 print ("Parsed result: \(parsedResult ??  ["Empty result":"" as AnyObject])")
-                
-                performUIUpdatesOnMain {
-                    self.activityIndicator.stopAnimating()
-                }
-                
-                
+             
                 if let error = error {
                     self.displayMessage(error)
                     return
@@ -93,12 +90,10 @@ class PhotoAlbumViewController : UIViewController {
                     return
                 }
                 
-                
                 guard let photosArray = photosDictionary[Constants.FlickrResponseKeys.Photo] as? [[String: AnyObject]] else {
                     return
                 }
                 print ("Photos found: \(photosArray.count)")
-                
                 
                 for photoDictionary in photosArray {
                     let photo = Photo(context: DataController.shared.viewContext)
@@ -107,30 +102,30 @@ class PhotoAlbumViewController : UIViewController {
                     }
                     photo.photoURL = URL(string: photoUrlString)
                     photo.pin = pin
-                    try? DataController.shared.viewContext.save()
-                    
+                    do {
+                        try DataController.shared.viewContext.save()
+                    } catch {
+                        print ("Couldn't save photo's attributes")
+                    }
                 }
-                
-            
-                
-                performUIUpdatesOnMain {
-                    self.activityIndicator.stopAnimating()
-                    
-                }
-                
-                
             }
         }
         
+        performUIUpdatesOnMain {
+            self.activityIndicator.stopAnimating()
+        }
     }
+}
+
+extension PhotoAlbumViewController {
+    
 }
 
 
 extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionViewDelegate {
     
-    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
+        return self.fetchedResultsController.sections?.count ?? 0
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let fr = self.fetchedResultsController else {
@@ -176,7 +171,6 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
             
         }
         else {
-            
             guard let photoURL = photo.photoURL else {
                 return
             }
@@ -187,7 +181,7 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
                     
                     photo.photoData = photoData
                     DispatchQueue.global(qos: .background).async {
-                        try? DataController.shared.viewContext.save()
+                        DataController.shared.save()
                     }
                     
                     performUIUpdatesOnMain {
@@ -197,7 +191,6 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
                 }
             }
         }
-        
     }
 }
 
@@ -217,36 +210,37 @@ extension PhotoAlbumViewController : NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         insertedIndexPaths = [IndexPath]()
         deletedIndexPaths = [IndexPath]()
+        updatedIndexPaths = [IndexPath]()
     }
+    
+    
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch type {
+        switch (type) {
         case .insert:
-            if let newIndexPath = newIndexPath {
-                insertedIndexPaths.append(newIndexPath)
-            }
+            insertedIndexPaths.append(newIndexPath!)
             break
         case .delete:
-            if let newIndexPath = newIndexPath {
-                deletedIndexPaths.append(newIndexPath)
-            }
+            deletedIndexPaths.append(indexPath!)
+            break
+        case .update:
+            updatedIndexPaths.append(indexPath!)
+            break
+            
         default: break
         }
-        
     }
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        self.collectionView.performBatchUpdates({() -> Void in
+        collectionView.performBatchUpdates({() -> Void in
             for indexPath in self.insertedIndexPaths {
-                //let indexPath = IndexPath(row: self.cellCount, section: 0)
-                //self.cellCount += 1
                 self.collectionView.insertItems(at: [indexPath])
             }
             for indexPath in self.deletedIndexPaths {
-                //let indexPath = IndexPath(row: self.cellCount, section: 0)
-                //self.cellCount += 1
                 self.collectionView.deleteItems(at: [indexPath])
             }
-            //self.cellCount = 0
+            for indexPath in self.updatedIndexPaths {
+                self.collectionView.reloadItems(at: [indexPath])
+            }
             
         }, completion: nil)
     }
