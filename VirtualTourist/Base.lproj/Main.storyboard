@@ -24,7 +24,7 @@
                                     <constraint firstAttribute="height" constant="128" id="OZJ-Zq-9P8"/>
                                 </constraints>
                             </mapView>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="ABT-Fl-wSH">
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" prefetchingEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ABT-Fl-wSH">
                                 <rect key="frame" x="0.0" y="192" width="414" height="500"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="NT0-ha-MQh">
@@ -74,7 +74,7 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="tax-XD-Ikn" userLabel="Activity Indicator">
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="tax-XD-Ikn" userLabel="Activity Indicator">
                                 <rect key="frame" x="197" y="390" width="20" height="20"/>
                             </activityIndicatorView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5vC-0C-tHx">
@@ -121,6 +121,7 @@
                         <outlet property="activityIndicator" destination="tax-XD-Ikn" id="39s-EB-jgh"/>
                         <outlet property="collectionView" destination="ABT-Fl-wSH" id="hep-DS-ZPf"/>
                         <outlet property="flowLayout" destination="NT0-ha-MQh" id="rCH-uM-hSJ"/>
+                        <outlet property="mapView" destination="D9Y-Yv-ua1" id="Ego-Yn-snV"/>
                         <outlet property="messageLabel" destination="Xs1-j9-5BV" id="Wy6-cc-5Ea"/>
                     </connections>
                 </viewController>
@@ -162,13 +163,34 @@
                                     <outletCollection property="gestureRecognizers" destination="Dgx-sk-FQw" appends="YES" id="aA0-Vf-ggw"/>
                                 </connections>
                             </mapView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qhr-dw-tfP" userLabel="LabelView">
+                                <rect key="frame" x="0.0" y="736" width="414" height="50"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap pins to delete" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ORV-RW-kyg" userLabel="Label">
+                                        <rect key="frame" x="139" y="-25" width="136" height="100"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="1" green="0.24256834320000001" blue="0.041704783299999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="ORV-RW-kyg" firstAttribute="top" secondItem="qhr-dw-tfP" secondAttribute="top" constant="-25" id="E4H-Gh-1yz"/>
+                                    <constraint firstItem="ORV-RW-kyg" firstAttribute="centerY" secondItem="qhr-dw-tfP" secondAttribute="centerY" id="TXg-gW-YEp"/>
+                                    <constraint firstItem="ORV-RW-kyg" firstAttribute="centerX" secondItem="qhr-dw-tfP" secondAttribute="centerX" id="q3E-Vj-Kvd"/>
+                                    <constraint firstAttribute="height" constant="50" id="rv9-Jd-2jy"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="AW1-N0-AXJ" firstAttribute="top" secondItem="kqN-d1-nQ4" secondAttribute="top" id="0FO-bd-b7a"/>
+                            <constraint firstItem="AW1-N0-AXJ" firstAttribute="top" secondItem="kqN-d1-nQ4" secondAttribute="top" identifier="mapViewTopConstraint" id="0FO-bd-b7a"/>
                             <constraint firstItem="AW1-N0-AXJ" firstAttribute="trailing" secondItem="kqN-d1-nQ4" secondAttribute="trailing" id="5eg-BZ-6ct"/>
                             <constraint firstItem="AW1-N0-AXJ" firstAttribute="leading" secondItem="kqN-d1-nQ4" secondAttribute="leading" id="Er0-sZ-bBq"/>
-                            <constraint firstAttribute="bottom" secondItem="AW1-N0-AXJ" secondAttribute="bottom" id="zO8-7T-Zex"/>
+                            <constraint firstItem="qhr-dw-tfP" firstAttribute="centerX" secondItem="kqN-d1-nQ4" secondAttribute="centerX" id="X1E-vz-Avp"/>
+                            <constraint firstItem="qhr-dw-tfP" firstAttribute="leading" secondItem="AW1-N0-AXJ" secondAttribute="leading" id="e42-5Q-tYQ"/>
+                            <constraint firstItem="qhr-dw-tfP" firstAttribute="top" secondItem="AW1-N0-AXJ" secondAttribute="bottom" id="viy-Mb-XWx"/>
+                            <constraint firstItem="kqN-d1-nQ4" firstAttribute="bottom" secondItem="AW1-N0-AXJ" secondAttribute="bottom" identifier="mapViewBottomConstraint" id="xSH-YD-WsT"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="kqN-d1-nQ4"/>
                     </view>
@@ -176,6 +198,7 @@
                         <barButtonItem key="backBarButtonItem" title="OK" id="vjM-eQ-hNd"/>
                     </navigationItem>
                     <connections>
+                        <outlet property="labelView" destination="qhr-dw-tfP" id="b4I-pQ-VPe"/>
                         <outlet property="mapView" destination="AW1-N0-AXJ" id="m7K-Wm-3pQ"/>
                         <segue destination="zl6-a1-xJe" kind="show" identifier="showAlbum" id="gmk-es-WVL"/>
                     </connections>
@@ -188,7 +211,7 @@
                     </connections>
                 </pongPressGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="-695.20000000000005" y="118.96551724137932"/>
+            <point key="canvasLocation" x="-695.6521739130435" y="118.20652173913044"/>
         </scene>
     </scenes>
 </document>

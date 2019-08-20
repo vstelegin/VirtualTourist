@@ -11,24 +11,23 @@ import CoreData
 
 class DataController{
     let persistentContainer: NSPersistentContainer
-    let backgroundContext: NSManagedObjectContext
-    let viewContext : NSManagedObjectContext
+    var backgroundContext: NSManagedObjectContext{
+        return persistentContainer.newBackgroundContext()
+    }
+    var viewContext:NSManagedObjectContext {
+        return persistentContainer.viewContext
+    }
     static let shared = DataController(modelName: "VirtualTourist")
-    
-    
     
     init (modelName: String){
         persistentContainer = NSPersistentContainer(name: modelName)
-        viewContext = persistentContainer.viewContext
-        backgroundContext = persistentContainer.newBackgroundContext()
     }
     
     func configureContexts(){
         viewContext.automaticallyMergesChangesFromParent = true
         backgroundContext.automaticallyMergesChangesFromParent = true
-        
-        backgroundContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         viewContext.mergePolicy = NSMergePolicy.mergeByPropertyStoreTrump
+        backgroundContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
     }
     
     func load(){
@@ -40,16 +39,15 @@ class DataController{
         }
     }
     func save(){
-        backgroundContext.performAndWait {
+        viewContext.performAndWait {
             if self.viewContext.hasChanges {
                 do {
-                    try self.backgroundContext.save()
+                    try self.viewContext.save()
                     print("Successfully saved context")
                 } catch {
                     print("Failed to save context")
                 }
             }
         }
-        
     }
 }

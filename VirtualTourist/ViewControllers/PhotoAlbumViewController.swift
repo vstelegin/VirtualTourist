@@ -8,12 +8,15 @@
 
 import UIKit
 import CoreData
+import MapKit
 
 class PhotoAlbumViewController : UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var activityIndicator : UIActivityIndicatorView!
     @IBOutlet weak var flowLayout : UICollectionViewFlowLayout!
+    @IBOutlet weak var mapView : MKMapView!
+    
     var pin: Pin?
     var fetchedResultsController: NSFetchedResultsController<Photo>!
     var imageURL : URL!
@@ -27,11 +30,11 @@ class PhotoAlbumViewController : UIViewController {
         fetchRequest.sortDescriptors = []
         fetchRequest.predicate = NSPredicate (format: "pin == %@", argumentArray: [pin!])
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: DataController.shared.viewContext, sectionNameKeyPath: nil, cacheName: nil)
-        
         fetchedResultsController.delegate = self
         do {
             try fetchedResultsController.performFetch()
         } catch {
+            print ("\(#function) Fetch failed")
             fatalError("The fetch could not be performed: \(error.localizedDescription)")
         }
     }
@@ -62,9 +65,17 @@ class PhotoAlbumViewController : UIViewController {
         guard let pin = pin else {
             return
         }
+        let location = String.LatLongToLocation(pin.lat!, pin.long!)
+        mapView.delegate = self
+        mapView.isZoomEnabled = false
+        mapView.isScrollEnabled = false
+        let viewRegion = MKCoordinateRegion(center: location, latitudinalMeters: 10000,longitudinalMeters: 10000)
+        mapView.setRegion(viewRegion, animated: true)
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = location
+        mapView.addAnnotation(annotation)
+     
         setupFetchedResultsController(pin)
-        activityIndicator.startAnimating()
-        
         if let photosAtThePin = pin.photosAtThePin, photosAtThePin.count == 0 {
             
             guard let lat = pin.lat, let long = pin.long  else {
@@ -73,7 +84,9 @@ class PhotoAlbumViewController : UIViewController {
             }
             
             FlickrAPI.shared.photosRequestFromLatLong(lat, long) { parsedResult, error in
-                
+                performUIUpdatesOnMain {
+                    self.activityIndicator.stopAnimating()
+                }
                 print ("Parsed result: \(parsedResult ??  ["Empty result":"" as AnyObject])")
              
                 if let error = error {
@@ -102,37 +115,24 @@ class PhotoAlbumViewController : UIViewController {
                     }
                     photo.photoURL = URL(string: photoUrlString)
                     photo.pin = pin
-                    do {
-                        try DataController.shared.viewContext.save()
-                    } catch {
-                        print ("Couldn't save photo's attributes")
-                    }
+                    DataController.shared.save()
                 }
             }
-        }
-        
-        performUIUpdatesOnMain {
-            self.activityIndicator.stopAnimating()
+        } else {
+            performUIUpdatesOnMain {
+                self.activityIndicator.stopAnimating()
+            }
         }
     }
 }
-
-extension PhotoAlbumViewController {
-    
-}
-
 
 extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionViewDelegate {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return self.fetchedResultsController.sections?.count ?? 0
+        return fetchedResultsController.sections?.count ?? 0
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let fr = self.fetchedResultsController else {
-            messageLabel.text = "No Results"
-            return 0
-        }
-        guard let sections = fr.sections else {
+        guard let sections = fetchedResultsController.sections else {
             return 0
         }
         return sections[section].numberOfObjects
@@ -243,5 +243,22 @@ extension PhotoAlbumViewController : NSFetchedResultsControllerDelegate {
             }
             
         }, completion: nil)
+    }
+}
+
+extension PhotoAlbumViewController : MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        let reuseId = "pin"
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
+        
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = false
+            pinView!.pinTintColor = .red
+            pinView!.animatesDrop = true
+        } else {
+            pinView!.annotation = annotation
+        }
+        return pinView
     }
 }

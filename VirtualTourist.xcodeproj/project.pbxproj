@@ -10,6 +10,7 @@
 		0613C87521F457810029D03C /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0613C87421F457810029D03C /* Constants.swift */; };
 		0613C87721F65F2E0029D03C /* PhotoAlbumViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0613C87621F65F2E0029D03C /* PhotoAlbumViewController.swift */; };
 		0613C87921F6F3010029D03C /* FlickrAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0613C87821F6F3010029D03C /* FlickrAPI.swift */; };
+		0624BAF6230B658C0052B794 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0624BAF5230B658C0052B794 /* Extensions.swift */; };
 		06709F2820D45E730077E3E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06709F2720D45E730077E3E9 /* AppDelegate.swift */; };
 		06709F2A20D45E730077E3E9 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06709F2920D45E730077E3E9 /* MapViewController.swift */; };
 		06709F2D20D45E730077E3E9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 06709F2B20D45E730077E3E9 /* Main.storyboard */; };
@@ -25,6 +26,7 @@
 		0613C87421F457810029D03C /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		0613C87621F65F2E0029D03C /* PhotoAlbumViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAlbumViewController.swift; sourceTree = "<group>"; };
 		0613C87821F6F3010029D03C /* FlickrAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickrAPI.swift; sourceTree = "<group>"; };
+		0624BAF5230B658C0052B794 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		06709F2420D45E730077E3E9 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		06709F2720D45E730077E3E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		06709F2920D45E730077E3E9 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
@@ -68,12 +70,11 @@
 		06709F2620D45E730077E3E9 /* VirtualTourist */ = {
 			isa = PBXGroup;
 			children = (
+				06709F2720D45E730077E3E9 /* AppDelegate.swift */,
 				06C981EE20DC60EE00A488BE /* Data */,
 				06709F3B20D5B0D50077E3E9 /* ViewControllers */,
-				06709F2720D45E730077E3E9 /* AppDelegate.swift */,
 				06709F2E20D45E7A0077E3E9 /* Assets.xcassets */,
 				06709F2B20D45E730077E3E9 /* Main.storyboard */,
-				0697EBCD21FDD765008CA29F /* PhotoCell.swift */,
 				06709F3020D45E7A0077E3E9 /* LaunchScreen.storyboard */,
 				06709F3320D45E7A0077E3E9 /* Info.plist */,
 			);
@@ -83,7 +84,9 @@
 		06709F3B20D5B0D50077E3E9 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				0697EBCD21FDD765008CA29F /* PhotoCell.swift */,
 				06709F2920D45E730077E3E9 /* MapViewController.swift */,
+				0624BAF5230B658C0052B794 /* Extensions.swift */,
 				0613C87621F65F2E0029D03C /* PhotoAlbumViewController.swift */,
 				0697EBCF21FDDB63008CA29F /* GCD.swift */,
 			);
@@ -178,6 +181,7 @@
 				0613C87721F65F2E0029D03C /* PhotoAlbumViewController.swift in Sources */,
 				06C981ED20DC60D900A488BE /* VirtualTourist.xcdatamodeld in Sources */,
 				0697EBD021FDDB63008CA29F /* GCD.swift in Sources */,
+				0624BAF6230B658C0052B794 /* Extensions.swift in Sources */,
 				06709F2A20D45E730077E3E9 /* MapViewController.swift in Sources */,
 				06709F2820D45E730077E3E9 /* AppDelegate.swift in Sources */,
 				0697EBCE21FDD765008CA29F /* PhotoCell.swift in Sources */,

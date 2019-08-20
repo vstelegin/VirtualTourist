@@ -16,12 +16,12 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
     var fetchedResultsController: NSFetchedResultsController<Pin>!
     
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var labelView : UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
         navigationItem.rightBarButtonItem = editButtonItem
-        
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "lat", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
@@ -38,12 +38,8 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         guard let pins = fetchedResultsController.fetchedObjects else {
             return
         }
-        
         for pin in pins {
-            let lat = Double(pin.lat!)
-            let long = Double (pin.long!)
-            let coordinate = CLLocationCoordinate2DMake(lat!, long!)
-            showPin(coordinate)
+            showPin(String.LatLongToLocation(pin.lat!, pin.long!))
         }        
     }
     
@@ -56,6 +52,20 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         mapView.gestureRecognizers?.first!.isEnabled = !editing
+        
+        guard let mapViewTopConstraintIndex = self.view.constraints.firstIndex(where: { $0.identifier == "mapViewTopConstraint"}) else{return}
+        guard let mapViewBottomConstraintIndex = self.view.constraints.firstIndex(where: { $0.identifier == "mapViewBottomConstraint"}) else{return}
+        let mapViewTopConstraint = self.view.constraints[mapViewTopConstraintIndex]
+        let mapViewBottomConstraint = self.view.constraints[mapViewBottomConstraintIndex]
+        print("constraint found")
+        let labelTransitionAnimator = UIViewPropertyAnimator (duration: 0.25, curve: .easeInOut, animations: {
+            let newConstant : CGFloat = self.isEditing ? 50 : 0
+            mapViewTopConstraint.constant = -newConstant
+            mapViewBottomConstraint.constant = newConstant
+            self.view.layoutIfNeeded()
+            })
+        
+        labelTransitionAnimator.startAnimation()
     }
     
     fileprivate func showPin(_ coordinate: CLLocationCoordinate2D) {
@@ -78,6 +88,7 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
             let pin = Pin(context: DataController.shared.viewContext)
             pin.lat = String(coordinate.latitude)
             pin.long = String(coordinate.longitude)
+            
             DataController.shared.save()
         default:
             break
@@ -87,11 +98,9 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
 
 extension MapViewController: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        
         let reuseId = "pin"
-        
         var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
-        
+
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = false
@@ -104,7 +113,6 @@ extension MapViewController: MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        
         guard let annotation = view.annotation else {
             return
         }
@@ -115,14 +123,13 @@ extension MapViewController: MKMapViewDelegate {
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         let predicate = NSPredicate(format: "lat == %@ AND long == %@", lat, long)
         fetchRequest.predicate = predicate
-        var selectedPin: Pin?
         
+        var selectedPin: Pin?
         do {
             try selectedPin = DataController.shared.viewContext.fetch(fetchRequest).first
         } catch {
             print (error)
         }
-        
         if isEditing {
             mapView.removeAnnotation(annotation)
             DataController.shared.viewContext.delete(selectedPin!)
