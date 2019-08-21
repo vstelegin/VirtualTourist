@@ -10,7 +10,6 @@ import Foundation
 import MapKit
 extension String {
     static func LatLongToLocation(_ lat : String, _ long : String) -> CLLocationCoordinate2D {
-        print ("\(lat) , \(long)")
         return CLLocationCoordinate2DMake(Double (lat)!, Double (long)!)
     }
 }

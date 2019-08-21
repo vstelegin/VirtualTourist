@@ -46,6 +46,8 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let photoAlbum = segue.destination as? PhotoAlbumViewController {
             photoAlbum.pin = sender as? Pin
+            photoAlbum.setupFetchedResultsController(sender as? Pin)
+            mapView.deselectAnnotation(annotation, animated: true)
         }
     }
     
@@ -57,7 +59,6 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         guard let mapViewBottomConstraintIndex = self.view.constraints.firstIndex(where: { $0.identifier == "mapViewBottomConstraint"}) else{return}
         let mapViewTopConstraint = self.view.constraints[mapViewTopConstraintIndex]
         let mapViewBottomConstraint = self.view.constraints[mapViewBottomConstraintIndex]
-        print("constraint found")
         let labelTransitionAnimator = UIViewPropertyAnimator (duration: 0.25, curve: .easeInOut, animations: {
             let newConstant : CGFloat = self.isEditing ? 50 : 0
             mapViewTopConstraint.constant = -newConstant
@@ -81,21 +82,18 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         switch sender.state {
         case .began:
             showPin(coordinate)
-            
         case .changed:
             annotation!.coordinate = coordinate
         case .ended:
             let pin = Pin(context: DataController.shared.viewContext)
             pin.lat = String(coordinate.latitude)
             pin.long = String(coordinate.longitude)
-            
             DataController.shared.save()
         default:
             break
         }
     }
 }
-
 extension MapViewController: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "pin"
@@ -116,7 +114,6 @@ extension MapViewController: MKMapViewDelegate {
         guard let annotation = view.annotation else {
             return
         }
-        mapView.deselectAnnotation(annotation, animated: true)
         let lat = String(annotation.coordinate.latitude)
         let long = String(annotation.coordinate.longitude)
         
@@ -129,6 +126,12 @@ extension MapViewController: MKMapViewDelegate {
             try selectedPin = DataController.shared.viewContext.fetch(fetchRequest).first
         } catch {
             print (error)
+        }
+        
+        guard selectedPin != nil else{
+            mapView.deselectAnnotation(annotation, animated: true)
+            print("pin is not ready")
+            return
         }
         if isEditing {
             mapView.removeAnnotation(annotation)

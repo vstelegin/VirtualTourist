@@ -11,7 +11,7 @@ import Foundation
 class FlickrAPI {
     
     static let shared = FlickrAPI()
-    
+    var page : Int?
     func photosRequestFromLatLong(_ lat: String, _ long: String, completion: @escaping (_ parsedResult: [String:AnyObject]?, _ error: String? ) -> Void){
         
         var components = URLComponents()
@@ -26,20 +26,20 @@ class FlickrAPI {
             Constants.FlickrParameterKeys.Format : Constants.FlickrParameterValues.ResponseFormat,
             Constants.FlickrParameterKeys.NoJSONCallback : Constants.FlickrParameterValues.DisableJSONCallback,
             Constants.FlickrParameterKeys.PhotosPerPage : Constants.FlickrParameterValues.PhotosPerPage,
+            Constants.FlickrParameterKeys.Page : "\(page ?? 1)",
             Constants.FlickrParameterKeys.Latitude : lat,
             Constants.FlickrParameterKeys.Longitude : long
         ]
-        
+        page = nil
         components.queryItems = [URLQueryItem]()
         for (key, value) in parameters {
             let queryItem = URLQueryItem(name: key, value: "\(value)")
             components.queryItems!.append(queryItem)
         }
         
-        print(components.url!)
+        print("\n\(components.url!)")
         let session = URLSession.shared
         let request = URLRequest(url: components.url!)
-        
         let task = session.dataTask(with: request) { (data, response, error) in
             
             guard (error == nil) else {

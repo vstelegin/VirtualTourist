@@ -14,6 +14,5 @@ class PhotoCell: UICollectionViewCell {
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     static let identifier = "PhotoCell"
-    var indexPath : IndexPath?
     var imageUrl: String = ""
 }

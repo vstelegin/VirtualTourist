@@ -48,7 +48,7 @@ struct Constants {
         static let URL = "url_q"
         static let UseSafeSearch = "1"
         static let SearchRadius = "4"
-        static let PhotosPerPage = "18"
+        static let PhotosPerPage = "24"
     }
     
     // MARK: - Flickr Response Keys

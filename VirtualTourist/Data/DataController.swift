@@ -43,7 +43,6 @@ class DataController{
             if self.viewContext.hasChanges {
                 do {
                     try self.viewContext.save()
-                    print("Successfully saved context")
                 } catch {
                     print("Failed to save context")
                 }
