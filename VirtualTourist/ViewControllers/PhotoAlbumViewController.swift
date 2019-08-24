@@ -31,18 +31,32 @@ class PhotoAlbumViewController : UIViewController {
             }
         }
     }
+    // Struct for Download Complete checking
     struct DownloadStatus {
-        var downloadedPhotos : Int
+        var downloadedPhotos : Int {
+            didSet{
+                if downloadedPhotos > 0 {
+                    print ("Downloaded photos: \(downloadedPhotos) \r")
+                }
+                if downloadedPhotos == min(photosToDownload,12) {
+                    downloadComplete = true
+                    reset()
+                }
+            }
+        }
         var photosToDownload : Int
         var downloadComplete : Bool
         init(){
             downloadedPhotos = 0
-            photosToDownload = 0
+            photosToDownload = -1
             downloadComplete = false
         }
         mutating func reset(){
             downloadedPhotos = 0
-            photosToDownload = 0
+            photosToDownload = -1
+        }
+        mutating func increment(){
+            downloadedPhotos += 1
         }
     }
     var downloadStatus = DownloadStatus()
@@ -66,8 +80,9 @@ class PhotoAlbumViewController : UIViewController {
             self.messageLabel.text = text;
         }
     }
-
     func loadPhotosFromThePin(_ pin : Pin){
+        
+        // Load photo URLs
         
         FlickrAPI.shared.photosRequestFromLatLong(pin.lat!, pin.long!) { parsedResult, error in
             performUIUpdatesOnMain {
@@ -108,17 +123,14 @@ class PhotoAlbumViewController : UIViewController {
             
         }
     }
+    
+    // New collection button
     @IBAction func newCollection(_ sender: Any){
-        guard let pin = pin else {
-            return
+        for photo in fetchedResultsController.fetchedObjects! {
+            DataController.shared.viewContext.delete(photo)
         }
-        guard let photosAtThePin = pin.photosAtThePin else {
-            return
-        }
-        for photo in photosAtThePin {
-            DataController.shared.viewContext.delete(photo as! NSManagedObject)
-        }
-        DataController.shared.save()
+        
+        try? DataController.shared.viewContext.save()
         if let totalPhotos = totalPhotos {
             let PhotosPerPage = Int(Constants.FlickrParameterValues.PhotosPerPage)!
             let totalPages = totalPhotos / PhotosPerPage + ((totalPhotos % PhotosPerPage > 0) ? 1 : 0 )
@@ -126,22 +138,23 @@ class PhotoAlbumViewController : UIViewController {
             FlickrAPI.shared.page = newPage
             print ("\n\nLoading page: \(newPage)")
         }
-        
-        loadPhotosFromThePin(pin)
-        self.downloadStatus.downloadComplete = false
-        performUIUpdatesOnMain {
-            self.newCollectionButton.isEnabled = false
+        guard let pin = pin else {
+            return
         }
+        loadPhotosFromThePin(pin)
+        newCollectionButton.isEnabled = false
+        self.downloadStatus.downloadComplete = false
+        self.downloadStatus.reset()
         
     }
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        newCollectionButton.isEnabled = false
-        
         guard let pin = pin else {
             return
         }
+        
+        // Minimap setup
         let location = String.LatLongToLocation(pin.lat!, pin.long!)
         mapView.delegate = self
         mapView.isZoomEnabled = false
@@ -151,7 +164,9 @@ class PhotoAlbumViewController : UIViewController {
         let annotation = MKPointAnnotation()
         annotation.coordinate = location
         mapView.addAnnotation(annotation)
- 
+        
+        // Fetch photos if the photo album is empty yet
+        
         if let photosAtThePin = pin.photosAtThePin, photosAtThePin.count == 0 {
             loadPhotosFromThePin(pin)
         } else {
@@ -162,18 +177,10 @@ class PhotoAlbumViewController : UIViewController {
     }
 }
 
-extension PhotoAlbumViewController : UICollectionViewDataSourcePrefetching {
-    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
-        for indexPath in indexPaths{
-            //downloadPhoto(indexPath: indexPath)
-        }
-    }
-}
-
 extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionViewDelegate {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return fetchedResultsController.sections?.count ?? 1
+        return fetchedResultsController.sections?.count ?? 0
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let sections = fetchedResultsController.sections else {
@@ -183,22 +190,21 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PhotoCell
-       
-        guard !downloadStatus.downloadComplete else {
-            return cell
-        }
-        guard let photo = fetchedResultsController.object(at: indexPath) as Photo? else {
-            return cell
-        }
+        cell.imageView.image = nil
+        cell.activityIndicator.startAnimating()
+        return cell
+    }
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let photo = fetchedResultsController.object(at: indexPath)
+        
         if let photoData = photo.photoData {
-            showPhoto(cell, photoData)
+            showPhoto(cell as! PhotoCell, photoData)
         } else {
             downloadPhoto(indexPath: indexPath)
         }
-        return cell
     }
-   
     
+    // Delete photo after selection
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let photoToDelete = fetchedResultsController.object(at: indexPath)
         DataController.shared.viewContext.delete(photoToDelete)
@@ -206,38 +212,42 @@ extension PhotoAlbumViewController : UICollectionViewDataSource, UICollectionVie
     }
 
     func showPhoto(_ cell : PhotoCell, _ photoData : Data){
-        
         performUIUpdatesOnMain{
             cell.imageView.image = UIImage(data: Data(referencing: photoData as NSData))
             cell.activityIndicator.stopAnimating()
         }
     }
-    func downloadPhoto(indexPath : IndexPath){
-        
-        
-        guard let photo = fetchedResultsController.object(at: indexPath) as Photo? else {
-            return
-        }
     
+    func downloadPhoto(indexPath : IndexPath){
+        let photo = fetchedResultsController.object(at: indexPath)
         guard let photoURL = photo.photoURL else {
+            print("\(#function) no URL")
             return
         }
-        
+        // Download photo in the async queue
         let downloadQueue = DispatchQueue(label: "download", attributes: [])
         downloadQueue.async {
-            if let photoData = try? Data(contentsOf: photoURL) {
-                
-                photo.photoData = photoData
-                DataController.shared.save()
-                self.downloadStatus.downloadedPhotos += 1
-                print ("Downloaded photos: \(self.downloadStatus.downloadedPhotos) \r")
-                if (self.downloadStatus.downloadedPhotos >= min(self.downloadStatus.photosToDownload, 12)){
-                    self.downloadStatus.reset()
-                    performUIUpdatesOnMain {
-                        self.newCollectionButton.isEnabled = true
+            let task = URLSession.shared.dataTask(with: photoURL) { data, response, error in
+                if let _ = error {
+                    print ("\(#function) Error downloading the photo")
+                    return
+                }
+                guard let response = response as? HTTPURLResponse, (200...299).contains(response.statusCode) else {
+                    print ("\(#function) Bad responce")
+                    return
+                }
+                if let photoData = data {
+                    photo.photoData = photoData
+                    DataController.shared.save()
+                    self.downloadStatus.increment()
+                    if self.downloadStatus.downloadComplete {
+                        performUIUpdatesOnMain {
+                            self.newCollectionButton.isEnabled = true
+                        }
                     }
                 }
             }
+            task.resume()
         }
     }
 }
@@ -247,7 +257,7 @@ extension PhotoAlbumViewController : UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-
+        //Calculate photo's cell to fit the view
         let photosRowWidth = view.frame.width - flowLayout.sectionInset.left - flowLayout.sectionInset.right
         let widthPerItem = photosRowWidth / photosPerRow
         
@@ -256,6 +266,7 @@ extension PhotoAlbumViewController : UICollectionViewDelegateFlowLayout {
 }
 
 extension PhotoAlbumViewController : NSFetchedResultsControllerDelegate {
+    
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         insertedIndexPaths = [IndexPath]()
         deletedIndexPaths = [IndexPath]()
@@ -275,7 +286,8 @@ extension PhotoAlbumViewController : NSFetchedResultsControllerDelegate {
             updatedIndexPaths.append(indexPath!)
             break
             
-        default: break
+        default:
+            break
         }
     }
     
@@ -295,11 +307,11 @@ extension PhotoAlbumViewController : NSFetchedResultsControllerDelegate {
     }
 }
 
+// Pin annotation setup
 extension PhotoAlbumViewController : MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "pin"
         var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
-        
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = false

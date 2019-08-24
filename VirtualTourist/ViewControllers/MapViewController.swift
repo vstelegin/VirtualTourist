@@ -20,8 +20,13 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         mapView.delegate = self
+    
         navigationItem.rightBarButtonItem = editButtonItem
+        
+        // Setup fetch results controller
+        
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "lat", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
@@ -43,6 +48,7 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         }        
     }
     
+    // Seque to the PhotoAlbum
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let photoAlbum = segue.destination as? PhotoAlbumViewController {
             photoAlbum.pin = sender as? Pin
@@ -51,10 +57,12 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         }
     }
     
+    // Pin edit mode
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         mapView.gestureRecognizers?.first!.isEnabled = !editing
         
+        // Show UI hint label
         guard let mapViewTopConstraintIndex = self.view.constraints.firstIndex(where: { $0.identifier == "mapViewTopConstraint"}) else{return}
         guard let mapViewBottomConstraintIndex = self.view.constraints.firstIndex(where: { $0.identifier == "mapViewBottomConstraint"}) else{return}
         let mapViewTopConstraint = self.view.constraints[mapViewTopConstraintIndex]
@@ -75,6 +83,7 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
         mapView.addAnnotation(annotation!)
     }
     
+    // Add pin with the gesture recognizer
     @IBAction func addPin (_ sender: UILongPressGestureRecognizer) {
         let location = sender.location(in: mapView)
         let coordinate = mapView.convert(location, toCoordinateFrom: mapView)
@@ -95,10 +104,10 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate{
     }
 }
 extension MapViewController: MKMapViewDelegate {
+    // Pin annotation view setup
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "pin"
         var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
-
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = false
@@ -121,18 +130,20 @@ extension MapViewController: MKMapViewDelegate {
         let predicate = NSPredicate(format: "lat == %@ AND long == %@", lat, long)
         fetchRequest.predicate = predicate
         
+        // Fetch the pin from DataController using selected pin's coords
         var selectedPin: Pin?
         do {
             try selectedPin = DataController.shared.viewContext.fetch(fetchRequest).first
         } catch {
             print (error)
         }
-        
         guard selectedPin != nil else{
             mapView.deselectAnnotation(annotation, animated: true)
             print("pin is not ready")
             return
         }
+        
+        // Delete pin if editing mode is active
         if isEditing {
             mapView.removeAnnotation(annotation)
             DataController.shared.viewContext.delete(selectedPin!)

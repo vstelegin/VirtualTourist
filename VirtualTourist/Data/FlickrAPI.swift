@@ -48,7 +48,7 @@ class FlickrAPI {
                 return
             }
             
-            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
+            guard let response = response as? HTTPURLResponse, (200...299).contains(response.statusCode) else {
                 completion(nil, "Bad status code from server")
                 return
             }
@@ -68,10 +68,7 @@ class FlickrAPI {
                 print("Could not parse the data as JSON: '\(data)'")
                 completion (nil, "Could not parse the data as JSON")
             }
-            
         }
-        
-        
         task.resume()
     }
     
